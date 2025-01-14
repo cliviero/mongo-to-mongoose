@@ -1,0 +1,35 @@
+{
+  "name": "mongo-to-mongoose",
+  "description": "Generate Mongoose schemas from MongoDB collections.",
+  "version": "0.1.6",
+  "type": "module",
+  "main": "index.js",
+  "bin": {
+    "mongo-to-mongoose": "index.js",
+    "m2m": "index.js"
+  },
+  "scripts": {
+    "start": "node index.js"
+  },
+  "dependencies": {
+    "commander": "^12.1.0",
+    "mongodb": "^6.12.0"
+  },
+  "author": "Cristian Liviero",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/cliviero/mongo-to-mongoose.git"
+  },
+  "keywords": [
+    "mongodb",
+    "mongoose",
+    "schema",
+    "generator",
+    "cli"
+  ],
+  "bugs": {
+    "url": "https://github.com/cliviero/mongo-to-mongoose/issues"
+  },
+  "homepage": "https://github.com/cliviero/mongo-to-mongoose"
+}
