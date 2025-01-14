@@ -1,0 +1,27 @@
+{
+  "name": "mongo-to-mongoose",
+  "version": "0.1.0",
+  "main": "index.js",
+  "bin": {
+    "mongo-to-mongoose": "index.js",
+    "m2m": "index.js"
+  },
+  "scripts": {
+    "start": "node index.js"
+  },
+  "keywords": [
+    "mongodb",
+    "mongoose",
+    "schema",
+    "generator",
+    "cli"
+  ],
+  "author": "Cristian Liviero",
+  "license": "MIT",
+  "description": "Generate Mongoose schemas from MongoDB collections.",
+  "dependencies": {
+    "clipboardy": "^4.0.0",
+    "commander": "^12.1.0",
+    "mongodb": "^6.12.0"
+  }
+}
