@@ -19,7 +19,7 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/cliviero/mongo-to-mongoose.git"
+    "url": "git+https://github.com/cliviero/mongo-to-mongoose.git"
   },
   "keywords": [
     "mongodb",
