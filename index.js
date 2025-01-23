@@ -1,8 +1,8 @@
 #!/usr/bin/env node
 
-const commander = require('commander');
-const clipboardy = require('clipboardy').default;
-const { MongoClient } = require('mongodb');
+import { Command } from 'commander';
+import clipboardy from 'clipboardy';
+import { MongoClient } from 'mongodb';
 
 function inferType(value) {
   if (typeof value === 'boolean') {
@@ -147,9 +147,9 @@ async function generateSchemaFromMongo(connectionUrl, collectionName, copyToClip
     }
 
     const typeKeyOption = typeKey ? `, { typeKey: '${typeKey}' }` : '';
-    const schema = `const mongoose = require('mongoose');\n\n` +
+    const schema = `import mongoose from 'mongoose';\n\n` +
       `const schema = new mongoose.Schema(${flatMapToMongooseJSONSchema(flatMap, 2, typeKey)}${typeKeyOption});\n\n` +
-      `module.exports = mongoose.model('${collectionName}', schema);`;
+      `export default mongoose.model('${collectionName}', schema);`;
 
     console.log(`\n\n${schema}`);
 
@@ -164,7 +164,7 @@ async function generateSchemaFromMongo(connectionUrl, collectionName, copyToClip
   }
 }
 
-const program = new commander.Command();
+const program = new Command();
 
 program
   .version('1.0.0')
