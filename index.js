@@ -24,13 +24,19 @@ function inferType(value) {
   throw new Error(`Unsupported type of: ${value}`);
 }
 
+function mergeTypes(existingType, newType) {
+  if (!existingType) return newType;
+  if (existingType === newType) return existingType;
+  return "mongoose.Schema.Types.Mixed";
+}
+
 function updateFlatMap(doc, flatMap = {}, path = '') {
   for (const key in doc) {
     const currentPath = path ? `${path}.${key}` : key;
     const value = doc[key];
 
     try {
-      flatMap[currentPath] = flatMap[currentPath] || inferType(value);
+      flatMap[currentPath] = mergeTypes(flatMap[currentPath], inferType(value));
     } catch (error) {
       if (typeof value === 'object' && !Array.isArray(value)) {
         updateFlatMap(value, flatMap, currentPath);
@@ -39,7 +45,7 @@ function updateFlatMap(doc, flatMap = {}, path = '') {
           if (typeof value[0] === 'object' && !Array.isArray(value[0])) {
             updateFlatMap(value[0], flatMap, currentPath + '.$');
           } else {
-            flatMap[currentPath + '.$'] = flatMap[currentPath] || inferType(value[0]);
+            flatMap[currentPath + '.$'] = mergeTypes(flatMap[currentPath + '.$'], inferType(value[0]));
           }
         } else {
           flatMap[currentPath] = ["mongoose.Schema.Types.Mixed"];
