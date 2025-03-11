@@ -47,8 +47,6 @@ function updateFlatMap(doc, flatMap = {}, path = '') {
           } else {
             flatMap[currentPath + '.$'] = mergeTypes(flatMap[currentPath + '.$'], inferType(value[0]));
           }
-        } else {
-          flatMap[currentPath] = ["mongoose.Schema.Types.Mixed"];
         }
       } else {
         console.error(error.message);
