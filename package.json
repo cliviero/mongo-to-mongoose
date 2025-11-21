@@ -13,7 +13,9 @@
   },
   "dependencies": {
     "commander": "^12.1.0",
-    "mongodb": "^6.12.0"
+    "flat": "^6.0.1",
+    "mongodb": "^6.12.0",
+    "stringify-object": "^6.0.0"
   },
   "author": "Cristian Liviero",
   "license": "MIT",

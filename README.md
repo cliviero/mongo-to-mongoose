@@ -28,7 +28,7 @@ m2m -u <MongoDB_Connection_URL> -c <Collection_Name> [options]
 ### Optional Flags
 
 - `-d, --dbName`: MongoDB database name.
-- `-t, --typeKey <typeKey>`: Specifies a custom `typeKey` for the Mongoose schema. If not provided, no `typeKey` is used.
+- `-t, --typeKey <typeKey>`: Specifies a custom `typeKey` for the Mongoose schema. If not provided, it defaults to standard Mongoose behavior, but automatically handles conflicts if a field is named `type` by nesting it (e.g., `type: { type: String }`).
 - `-s, --sampleSize <sampleSize>`: Number of documents to sample for schema generation. If not provided, the tool processes the entire collection.
 
 ### Performance Tip
