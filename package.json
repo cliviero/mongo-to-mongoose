@@ -18,20 +18,5 @@
     "stringify-object": "^6.0.0"
   },
   "author": "Cristian Liviero",
-  "license": "MIT",
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/cliviero/mongo-to-mongoose.git"
-  },
-  "keywords": [
-    "mongodb",
-    "mongoose",
-    "schema",
-    "generator",
-    "cli"
-  ],
-  "bugs": {
-    "url": "https://github.com/cliviero/mongo-to-mongoose/issues"
-  },
-  "homepage": "https://github.com/cliviero/mongo-to-mongoose"
+  "private": true
 }

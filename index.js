@@ -1,13 +1,13 @@
 #!/usr/bin/env node
 
 import { Command } from 'commander';
-import { MongoClient } from 'mongodb';
+import { unflatten } from 'flat';
 import { readFile } from 'fs/promises';
+import { MongoClient } from 'mongodb';
 import { dirname, join } from 'path';
+import stringifyObject from 'stringify-object';
 import { fileURLToPath } from 'url';
 import { flatten } from './custom-flat.js';
-import { unflatten } from 'flat';
-import stringifyObject from 'stringify-object';
 
 // Get the directory name of the current module
 const __dirname = dirname(fileURLToPath(import.meta.url));
@@ -15,43 +15,37 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 // Read package.json to get version
 const packageJson = JSON.parse(await readFile(join(__dirname, 'package.json'), 'utf-8'));
 
-function inferType(value) {
-  if (typeof value === 'boolean') {
-    return "Boolean";
-  }
-  if (typeof value === 'number' || value._bsontype === 'Decimal128') {
-    return "Number";
-  }
-  if (value instanceof Date) {
-    return "Date";
-  }
-  const valueAsDate = new Date(value);
-  if (valueAsDate instanceof Date && !isNaN(valueAsDate.getTime()) && typeof value === 'string' && !/^\d[\d\s]*$/.test(value)) {
-    return "Date";
-  }
-  if (typeof value === 'string') {
-    return "String";
-  }
-  if (value._bsontype === 'ObjectId') {
-    return "Schema.Types.ObjectId";
-  }
-  throw new Error(`Unsupported type of: ${value}`);
-}
-
-function mergeTypes(existingType, newType) {
-  if (!existingType) return newType;
-  if (existingType === newType) return existingType;
-  return "Schema.Types.Mixed";
+const BsonToMongooseTypeMap = {
+  String: 'String',
+  Number: 'Number',
+  Date: 'Date',
+  Binary: 'Buffer',
+  Boolean: 'Boolean',
+  ObjectId: 'Schema.Types.ObjectId',
+  Decimal128: 'Schema.Types.Decimal128',
+  Long: 'BigInt', // Int64
+  Double: 'Number',
+  Int32: 'Number',
+  BSONSymbol: 'Schema.Types.Mixed',
+  Code: 'Schema.Types.Mixed',
+  MinKey: 'Schema.Types.Mixed',
+  MaxKey: 'Schema.Types.Mixed',
+  Timestamp: 'Schema.Types.Mixed'
 }
 
 function updateFlatMap(doc, flatMap = {}, typeKey = 'type') {
   const flattened = flatten(doc, { 
-    // Custom option to avoid flattening certain MongoDB types
-    shouldFlatten: (value) => {
-      if (value && typeof value === 'object' && (value._bsontype || value instanceof Date)) {
-        return false;
+    safeTransform: (value) => {
+      if (value == null || value instanceof RegExp) {
+        return 'Schema.Types.Mixed';
       }
-      return true;
+
+      const mongooseType = BsonToMongooseTypeMap[value?.constructor?.name]
+      if (mongooseType) {
+        return mongooseType;
+      }
+      
+      return undefined;
     }
   });
 
@@ -67,7 +61,12 @@ function updateFlatMap(doc, flatMap = {}, typeKey = 'type') {
     }
 
     try {
-      flatMap[normalizedKey] = mergeTypes(flatMap[normalizedKey], inferType(value));
+      const existingType = flatMap[normalizedKey];
+      const newType = value;
+      if (!newType) {
+        throw new Error(`Unsupported BSON type: ${value}`);
+      }
+      flatMap[normalizedKey] = mergeTypes(existingType, newType );
     } catch (error) {
       console.error('Error updating flatMap:', error.message);
     }
@@ -83,7 +82,7 @@ async function generateSchemaFromMongo(connectionUrl, collectionName, dbName, ty
   try {
     await client.connect();
     const db = client.db(dbName);
-    const collection = db.collection(collectionName);
+    const collection = db.collection(collectionName, { promoteValues: false });
     const cursor = sampleSize
       ? collection.aggregate([{ $sample: { size: sampleSize } }])
       : collection.find();

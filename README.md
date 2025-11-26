@@ -4,13 +4,17 @@
 
 `mongo-to-mongoose` is a CLI tool that generates Mongoose schemas from MongoDB collections.
 
-## Installation
+## Setup
 
-Install globally using npm to run `m2m` from anywhere:
-
-```bash
-npm install -g mongo-to-mongoose
-```
+1. Clone the repository.
+2. Install dependencies:
+   ```bash
+   npm install
+   ```
+3. Link the package locally (optional):
+   ```bash
+   npm link
+   ```
 
 ## Usage
 
@@ -77,12 +81,4 @@ Generated schema:
 
 - If the collection is empty, a message is displayed, and no schema is generated.
 - If an unsupported data type is encountered, an error message is logged.
-
-## Contributing
-
-Contributions are welcome! Feel free to submit issues or pull requests to enhance the tool.
-
-## License
-
-This project is licensed under the MIT License.
 
