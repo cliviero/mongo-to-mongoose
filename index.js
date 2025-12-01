@@ -8,6 +8,7 @@ import { dirname, join } from 'path';
 import stringifyObject from 'stringify-object';
 import { fileURLToPath } from 'url';
 import { flatten } from './custom-flat.js';
+import traverse from 'traverse';
 
 // Get the directory name of the current module
 const __dirname = dirname(fileURLToPath(import.meta.url));
@@ -117,6 +118,15 @@ function updateFlatMap(doc, flatMap = {}, typeKey) {
   return flatMap;
 }
 
+function deepEqual(a, b) {
+  return JSON.stringify(a) === JSON.stringify(b);
+}
+
+function allValuesAreEqual(obj) {
+  const values = Object.values(obj);
+  return values.every(v => deepEqual(v, values[0]));
+}
+
 async function generateSchemaFromMongo(connectionUrl, collectionName, dbName, typeKey, sampleSize) {
   const client = new MongoClient(connectionUrl);
   try {
@@ -137,8 +147,17 @@ async function generateSchemaFromMongo(connectionUrl, collectionName, dbName, ty
       flatMap = updateFlatMap(doc, flatMap, typeKey);
     }
 
-    const json = unflatten(flatMap);
-    const schema = stringifyObject(json, { 
+    const objSchema = unflatten(flatMap);
+    traverse(objSchema).forEach(function (node) {
+      if (this.keys?.length > 1 && allValuesAreEqual(node)) {
+        this.update({
+          [typeKey || 'type']: 'Map',
+          of: node[Object.keys(node)[0]]
+        });
+      }
+    })
+
+    const strSchema = stringifyObject(objSchema, { 
       indent: '  ', 
       transform: (object, property, originalResult) => {
         const value = object[property];
@@ -149,7 +168,7 @@ async function generateSchemaFromMongo(connectionUrl, collectionName, dbName, ty
       }
     });
 
-    console.log(schema);
+    console.log(strSchema);
   } finally {
     await client.close();
   }
