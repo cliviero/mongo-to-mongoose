@@ -33,7 +33,7 @@ const BsonToMongooseTypeMap = {
   Timestamp: 'Schema.Types.Mixed'
 }
 
-function updateFlatMap(doc, flatMap = {}, typeKey = 'type') {
+function updateFlatMap(doc, flatMap = {}, typeKey) {
   const flattened = flatten(doc, { 
     safeTransform: (value) => {
       if (value == null || value instanceof RegExp) {
@@ -49,24 +49,66 @@ function updateFlatMap(doc, flatMap = {}, typeKey = 'type') {
     }
   });
 
-  for (const [key, value] of Object.entries(flattened)) {
-    // Normalize any numeric index in the path to '0' to merge types of all array elements
-    let normalizedKey = key.replace(/\.\d+(\.|$)/g, '.0$1');
-
-    // Handle 'type' field name collision with Mongoose or custom typeKey usage
-    if (typeKey !== 'type') {
-      normalizedKey += `.${typeKey}`;
-    } else if (normalizedKey === 'type' || normalizedKey.endsWith('.type')) {
-      normalizedKey += '.type';
-    }
-
+  for (const [key, newType] of Object.entries(flattened)) {
     try {
-      const existingType = flatMap[normalizedKey];
-      const newType = value;
       if (!newType) {
-        throw new Error(`Unsupported BSON type: ${value}`);
+        throw new Error(`Unsupported BSON type: ${newType}`);
       }
-      flatMap[normalizedKey] = mergeTypes(existingType, newType );
+
+      // Normalize any numeric index in the path to '0' to merge types of all array elements
+      const normalizedKeyWithoutSuffix = key.replace(/\.\d+(\.|$)/g, '.0$1');
+      let normalizedKey = normalizedKeyWithoutSuffix;
+
+      // Handle 'type' field name collision with Mongoose or custom typeKey usage
+      const suffix = typeKey ? `.${typeKey}` : '.type';
+      if (typeKey || normalizedKey === 'type' || normalizedKey.endsWith('.type')) {
+        normalizedKey += suffix;
+      }
+
+      const existingType = flatMap[normalizedKey] || flatMap[`${normalizedKey}${suffix}`];
+      const isUnion = existingType === "Schema.Types.Union";
+
+      if (!existingType) {
+        flatMap[normalizedKey] = newType; 
+        continue;
+      }
+      if (existingType === "Schema.Types.Mixed") {
+        continue;
+      }
+      if (newType === "Schema.Types.Mixed") {
+        if (isUnion) {
+          let index = 0;
+          while (flatMap[`${normalizedKeyWithoutSuffix}.of.${index}`]) {
+            delete flatMap[`${normalizedKeyWithoutSuffix}.of.${index}`];
+            index++;
+          }
+        }
+        flatMap[normalizedKey] = "Schema.Types.Mixed"; 
+        continue;
+      }
+      if (isUnion) {
+        const unionTypes = [];
+        let index = 0;
+        while (flatMap[`${normalizedKey}.of.${index}`]) {
+          unionTypes.push(flatMap[`${normalizedKey}.of.${index}`]);
+          index++;
+        }
+        if (unionTypes.includes(newType)) {
+          // Type already exists in union
+          continue;
+        }
+        flatMap[`${normalizedKey}.of.${index}`] = newType;
+        continue;
+      }
+      if (existingType === newType) {
+        flatMap[normalizedKey] = existingType; 
+        continue;
+      }
+      // New union
+      flatMap[`${normalizedKeyWithoutSuffix}${suffix}`] = "Schema.Types.Union";
+      flatMap[`${normalizedKeyWithoutSuffix}.of.0`] = existingType;
+      flatMap[`${normalizedKeyWithoutSuffix}.of.1`] = newType;
+      delete flatMap[normalizedKeyWithoutSuffix];
     } catch (error) {
       console.error('Error updating flatMap:', error.message);
     }
@@ -74,8 +116,6 @@ function updateFlatMap(doc, flatMap = {}, typeKey = 'type') {
 
   return flatMap;
 }
-
-
 
 async function generateSchemaFromMongo(connectionUrl, collectionName, dbName, typeKey, sampleSize) {
   const client = new MongoClient(connectionUrl);
