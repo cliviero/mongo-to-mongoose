@@ -1,7 +1,7 @@
 {
   "name": "mongo-to-mongoose",
   "description": "Generate Mongoose schemas from MongoDB collections.",
-  "version": "0.1.9",
+  "version": "0.1.10",
   "type": "module",
   "main": "index.js",
   "bin": {
@@ -35,4 +35,4 @@
     "cli",
     "generator"
   ]
-}  
+}
