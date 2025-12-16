@@ -19,5 +19,20 @@
     "traverse": "^0.6.11"
   },
   "author": "Cristian Liviero",
-  "license": "BSD-3-Clause"
-} 
+  "license": "BSD-3-Clause",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/cliviero/mongo-to-mongoose.git"
+  },
+  "bugs": {
+    "url": "https://github.com/cliviero/mongo-to-mongoose/issues"
+  },
+  "homepage": "https://github.com/cliviero/mongo-to-mongoose#readme",
+  "keywords": [
+    "mongodb",
+    "mongoose",
+    "schema",
+    "cli",
+    "generator"
+  ]
+}  
