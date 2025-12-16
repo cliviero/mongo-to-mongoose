@@ -1,7 +1,7 @@
 {
   "name": "mongo-to-mongoose",
   "description": "Generate Mongoose schemas from MongoDB collections.",
-  "version": "0.1.8",
+  "version": "0.1.9",
   "type": "module",
   "main": "index.js",
   "bin": {
@@ -19,5 +19,5 @@
     "traverse": "^0.6.11"
   },
   "author": "Cristian Liviero",
-  "private": true
-}
+  "license": "BSD-3-Clause"
+} 

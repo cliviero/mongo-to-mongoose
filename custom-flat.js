@@ -2,6 +2,7 @@
  * This software contains code derived from the 'flat' library:
  * Copyright (c) 2014, Hugh Kennedy
  * Licensed under BSD 3-Clause License
+ * SPDX-License-Identifier: BSD-3-Clause
  */
 
 function isBuffer(obj) {

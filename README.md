@@ -82,3 +82,11 @@ Generated schema:
 - If the collection is empty, a message is displayed, and no schema is generated.
 - If an unsupported data type is encountered, an error message is logged.
 
+## License
+
+This project is released under the BSD-3-Clause license. See the `LICENSE` file for details.
+
+## Attribution
+
+`custom-flat.js` contains code derived from the 'flat' library (Copyright (c) 2014, Hugh Kennedy).
+
